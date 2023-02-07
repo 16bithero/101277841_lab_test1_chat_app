@@ -5,6 +5,7 @@ const io = require('socket.io')(server)
 const mongoose = require('mongoose');
 const UserModel = require('./models/UserListModel');
 
+
 app.set('views', './views')
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
@@ -23,7 +24,7 @@ mongoose.connect('mongodb+srv://101277841_Renzzi:qw12345@cluster0.prgemqj.mongod
 });
 
 app.get('/', (req, res) => {
-  res.render('index', { rooms: rooms })
+  res.render('signup')
 })
 
 app.post('/signup', async (req,res) => {
@@ -46,13 +47,50 @@ app.post('/signup', async (req,res) => {
         if(err){
           res.send(err)
         }else{
-          res.sendFile(__dirname + "/login.html")
+          res.render('login', { rooms: rooms })
         }
       });
     } catch (err) {
       res.status(500).send(err);
     }
 })
+
+app.post("/login", async(req,res) =>{
+  var username = req.body.username
+  var password = req.body.password
+  console.log(username)
+  //Responses
+  const noUser = {
+      "status": false,
+      "message": "No user with the username found in the database."
+  }
+  
+  const wrongPass = {
+      "status": false,
+      "message": "Invalid password. Check and try again."
+  }
+
+  const validLogin = {
+      "status": true,
+      "message": "Login Success."
+  }
+
+  try {
+      const validUser = await UserModel.findOne({ username })
+      if(!validUser) {
+         prompt(noUser)
+      }
+      // !validUser.comparePassword(password, (error, match) => {
+      //     if(!match) {
+      //         prompt(wrongPass)
+      //     }
+      // });
+      res.render('index', { rooms: rooms })
+  } catch (error) {
+      res.status(400).send(error);
+  }
+})
+
 
 app.post('/room', (req, res) => {
   if (rooms[req.body.room] != null) {
