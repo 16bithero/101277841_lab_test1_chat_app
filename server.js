@@ -10,8 +10,46 @@ app.use(express.urlencoded({ extended: true }))
 
 const rooms = { }
 
+
+mongoose.connect('mongodb+srv://101277841_Renzzi:qw12345@cluster0.prgemqj.mongodb.net/ChatApp?retryWrites=true&w=majority', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(success => {
+  console.log('Success Mongodb connection')
+}).catch(err => {
+  console.log('Error Mongodb connection')
+});
+
 app.get('/', (req, res) => {
   res.render('index', { rooms: rooms })
+})
+
+app.post('/signup', async (req,res) => {
+  var username = req.body.username
+  var firstname = req.body.firstname
+  var lastname = req.body.lastname
+  var password = req.body.password
+
+  var data = {
+      "username": username,
+      "firstname": firstname,
+      "lastname": lastname,
+      "password": password
+  }
+
+
+  const user = new UserModel(data);
+  try {
+      await user.save((err) => {
+        if(err){
+          res.send(err)
+        }else{
+          res.sendFile(__dirname + "/login.html")
+        }
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
 })
 
 app.post('/room', (req, res) => {
