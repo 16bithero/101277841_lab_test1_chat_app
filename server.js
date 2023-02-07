@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
+const mongoose = require('mongoose');
+const UserModel = require('./models/UserListModel');
 
 app.set('views', './views')
 app.set('view engine', 'ejs')
