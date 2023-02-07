@@ -90,11 +90,11 @@ app.post("/login", async(req,res) =>{
   const validUser = await UserModel.findOne({ username })
   try {
       if(!validUser) {
-        res.render('errorLogin')
+        return res.render('errorLogin')
       }
       !validUser.comparePassword(password, (error, match) => {
           if(!match) {
-            res.render('errorLogin')
+            return res.render('errorLogin')
           }
       });
       res.render('index', { rooms: rooms, name: usernames })
