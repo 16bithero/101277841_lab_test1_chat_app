@@ -4,7 +4,7 @@ const server = require('http').Server(app)
 const io = require('socket.io')(server)
 const mongoose = require('mongoose');
 const UserModel = require('./models/UserListModel');
-
+const MessageModel = require('./models/UserListModel');
 
 app.set('views', './views')
 app.set('view engine', 'ejs')
@@ -24,6 +24,14 @@ mongoose.connect('mongodb+srv://101277841_Renzzi:qw12345@cluster0.prgemqj.mongod
 });
 
 app.get('/', (req, res) => {
+  res.render('homepage')
+})
+
+app.get('/loginLink', (req, res) => {
+  res.render('login')
+})
+
+app.get('/signupLink', (req, res) => {
   res.render('signup')
 })
 
@@ -47,7 +55,7 @@ app.post('/signup', async (req,res) => {
         if(err){
           res.send(err)
         }else{
-          res.render('login', { rooms: rooms })
+          res.render('login')
         }
       });
     } catch (err) {
@@ -91,6 +99,31 @@ app.post("/login", async(req,res) =>{
   }
 })
 
+app.post('/messages', async (req,res) => {
+  var from_user = req.body.username
+  var room = req.body.room
+  var message = req.body.message
+
+  var msg = {
+    "from_user": from_user,
+    "room": room,
+    "message": message
+}
+
+  const sendMsg = new MessageModel(msg)
+  try {
+    await sendMsg.save((err) => {
+      if(err){
+        console.log(err)
+      }else{
+        io.emit('chat-message', msg)
+      }
+    });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+})
+
 
 app.post('/room', (req, res) => {
   if (rooms[req.body.room] != null) {
@@ -110,6 +143,7 @@ app.get('/:room', (req, res) => {
 })
 
 server.listen(3000)
+
 
 io.on('connection', socket => {
   socket.on('new-user', (room, name) => {

@@ -3,9 +3,10 @@ const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const messageForm = document.getElementById('send-container')
 const messageInput = document.getElementById('message-input')
+// const tempName = localStorage.getItem("username")
 
 if (messageForm != null) {
-  const name = prompt('What is your name?')
+  const name = localStorage.getItem("username")
   appendMessage('You joined')
   socket.emit('new-user', roomName, name)
 
@@ -15,6 +16,8 @@ if (messageForm != null) {
     appendMessage(`You: ${message}`)
     socket.emit('send-chat-message', roomName, message)
     messageInput.value = ''
+    // sendMessage({from_user: name, room: roomName, message: message})
+
   })
 }
 
@@ -44,4 +47,9 @@ function appendMessage(message) {
   const messageElement = document.createElement('div')
   messageElement.innerText = message
   messageContainer.append(messageElement)
+  
 }
+
+// function sendMessage(message){
+//   $post('http://localhost:3000/messages', message)
+// }
