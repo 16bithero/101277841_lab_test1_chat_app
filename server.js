@@ -12,6 +12,7 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
 
 const rooms = { }
+const usernames = { }
 
 
 mongoose.connect('mongodb+srv://101277841_Renzzi:qw12345@cluster0.prgemqj.mongodb.net/ChatApp?retryWrites=true&w=majority', {
@@ -35,6 +36,10 @@ app.get('/signupLink', (req, res) => {
   res.render('signup')
 })
 
+app.get('/roomPages', (req, res) => {
+  res.render('index', { rooms: rooms })
+})
+
 app.post('/signup', async (req,res) => {
   var username = req.body.username
   var firstname = req.body.firstname
@@ -53,7 +58,7 @@ app.post('/signup', async (req,res) => {
   try {
       await user.save((err) => {
         if(err){
-          res.send(err)
+          res.render('errorSign')
         }else{
           res.render('login')
         }
@@ -66,7 +71,7 @@ app.post('/signup', async (req,res) => {
 app.post("/login", async(req,res) =>{
   var username = req.body.username
   var password = req.body.password
-  console.log(username)
+
   //Responses
   const noUser = {
       "status": false,
@@ -82,18 +87,17 @@ app.post("/login", async(req,res) =>{
       "status": true,
       "message": "Login Success."
   }
-
+  const validUser = await UserModel.findOne({ username })
   try {
-      const validUser = await UserModel.findOne({ username })
       if(!validUser) {
-         prompt(noUser)
+        res.render('errorLogin')
       }
-      // !validUser.comparePassword(password, (error, match) => {
-      //     if(!match) {
-      //         prompt(wrongPass)
-      //     }
-      // });
-      res.render('index', { rooms: rooms })
+      !validUser.comparePassword(password, (error, match) => {
+          if(!match) {
+            res.render('errorLogin')
+          }
+      });
+      res.render('index', { rooms: rooms, name: usernames })
   } catch (error) {
       res.status(400).send(error);
   }
